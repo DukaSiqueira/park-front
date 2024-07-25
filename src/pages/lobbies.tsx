@@ -67,7 +67,7 @@ const LobbyCard = styled.div`
 
 const LobbyList = () => {
   const router = useRouter();
-  const { eventId } = router.query;
+  const { compId, eventId } = router.query;
   const [lobbies, setLobbies] = useState([]);
 
   useEffect(() => {
@@ -87,7 +87,7 @@ const LobbyList = () => {
   }, [eventId]);
 
   const handleSelectLobby = (lobbyId: number) => {
-    router.push(`/options?lobbyId=${lobbyId}`);
+    router.push(`/options?compId=${compId}&eventId=${eventId}&lobbyId=${lobbyId}`);
   };
 
   return (

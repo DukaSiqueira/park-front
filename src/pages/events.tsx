@@ -82,7 +82,7 @@ const Events = () => {
   );
 
   const handleEventClick = (eventId: number) => {
-    router.push(`/lobbies?eventId=${eventId}`);
+    router.push(`/lobbies?compId=${compId}&eventId=${eventId}`);
   };
 
   return (

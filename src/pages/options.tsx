@@ -66,14 +66,14 @@ const Title = styled.h1`
 
 const Options = () => {
   const router = useRouter();
-  const { lobbyId } = router.query;
+  const { compId, eventId, lobbyId } = router.query;
 
   const handleScanQR = () => {
-    router.push(`/scan-qr?lobbyId=${lobbyId}`);
+    router.push(`/scan-qr?compId=${compId}&eventId=${eventId}&lobbyId=${lobbyId}`);
   };
 
   const handleCarList = () => {
-    router.push(`/car-list?lobbyId=${lobbyId}`);
+    router.push(`/car-list?compId=${compId}&eventId=${eventId}&lobbyId=${lobbyId}`);
   };
 
   return (
