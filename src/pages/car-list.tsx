@@ -1,5 +1,6 @@
 import styled from 'styled-components';
 import Layout from '../components/Layout';
+import withAuth from '../utils/withAuth';
 
 const CarListContainer = styled.div`
   display: flex;
@@ -21,4 +22,4 @@ const CarList = () => {
   );
 };
 
-export default CarList;
+export default withAuth(CarList);

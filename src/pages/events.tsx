@@ -3,6 +3,7 @@ import { useRouter } from 'next/router';
 import styled from 'styled-components';
 import axios from '../utils/axios';
 import Layout from '../components/Layout';
+import withAuth from '../utils/withAuth';
 
 const EventListContainer = styled.div`
   display: flex;
@@ -94,4 +95,4 @@ const Events = () => {
   );
 };
 
-export default Events;
+export default withAuth(Events);

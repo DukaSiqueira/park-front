@@ -3,6 +3,7 @@ import styled from 'styled-components';
 import { useRouter } from 'next/router';
 import axios from '../utils/axios';
 import Layout from '../components/Layout';
+import withAuth from '../utils/withAuth';
 
 const CompanyListContainer = styled.div`
   display: flex;
@@ -107,4 +108,4 @@ const CompanyList = () => {
   );
 };
 
-export default CompanyList;
+export default withAuth(CompanyList);

@@ -15,7 +15,7 @@ const LoginForm = styled.form`
   display: flex;
   flex-direction: column;
   background: white;
-  padding: 2rem;
+  padding: 2.5rem;
   border-radius: 8px;
   box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
 `;

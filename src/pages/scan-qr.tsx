@@ -2,6 +2,7 @@ import { useState } from 'react';
 import styled from 'styled-components';
 import dynamic from 'next/dynamic';
 import Layout from '../components/Layout';
+import withAuth from '../utils/withAuth';
 
 const QrScanner = dynamic(() => import('react-qr-scanner'));
 
@@ -56,4 +57,4 @@ const ScanQR = () => {
   );
 };
 
-export default ScanQR;
+export default withAuth(ScanQR);

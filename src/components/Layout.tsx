@@ -9,7 +9,7 @@ const Container = styled.div`
 
 const Main = styled.main`
   flex: 1;
-  padding: 1rem;
+  padding: 0.4rem;
 `;
 
 interface LayoutProps {
