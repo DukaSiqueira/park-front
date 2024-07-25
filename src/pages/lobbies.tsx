@@ -78,6 +78,7 @@ const LobbyList = () => {
           setLobbies(response.data);
         } catch (error) {
           console.error('Error fetching lobbies:', error);
+          router.push('/login');
         }
       };
 
