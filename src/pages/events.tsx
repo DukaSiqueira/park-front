@@ -43,6 +43,12 @@ const EventCard = styled.div`
   flex-direction: column;
   align-items: center;
   text-align: center;
+  cursor: pointer;
+  transition: transform 0.2s;
+
+  &:hover {
+    transform: translateY(-3px);
+  }
 
   h2 {
     margin: 0.5rem 0;
@@ -75,6 +81,10 @@ const Events = () => {
     event.name.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
+  const handleEventClick = (eventId: number) => {
+    router.push(`/lobbies?eventId=${eventId}`);
+  };
+
   return (
     <Layout>
       <EventListContainer>
@@ -86,7 +96,7 @@ const Events = () => {
           onChange={(e) => setSearchTerm(e.target.value)}
         />
         {filteredEvents.map((event: any) => (
-          <EventCard key={event.id}>
+          <EventCard key={event.id} onClick={() => handleEventClick(event.id)}>
             <h2>{event.name}</h2>
           </EventCard>
         ))}
