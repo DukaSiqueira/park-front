@@ -1,10 +1,11 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { useRouter } from 'next/router';
 import styled from 'styled-components';
 import Layout from '../components/Layout';
 import withAuth from '../utils/withAuth';
 import axios from '../utils/axios';
-import { Html5Qrcode } from 'html5-qrcode';
+import { BrowserMultiFormatReader } from '@zxing/library';
+import Webcam from 'react-webcam';
 
 const ScanQRContainer = styled.div`
   display: flex;
@@ -58,69 +59,24 @@ const ScanQR = () => {
   const [processing, setProcessing] = useState<boolean>(false);
   const [result, setResult] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const [isMediaDevicesAvailable, setIsMediaDevicesAvailable] = useState<boolean>(true);
-  const [isPermissionGranted, setIsPermissionGranted] = useState<boolean>(true);
   const router = useRouter();
   const { compId, eventId, lobbyId } = router.query;
-  const qrCodeRegionId = "html5qr-code-full-region";
-  const html5QrCode = useRef<Html5Qrcode | null>(null);
+  const webcamRef = useRef<Webcam>(null);
+  const codeReader = new BrowserMultiFormatReader();
 
   useEffect(() => {
-    if (typeof navigator !== 'undefined' && !navigator.mediaDevices) {
-      setIsMediaDevicesAvailable(false);
-    }
-  }, []);
-
-  useEffect(() => {
-    const checkPermissions = async () => {
-      if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
-        try {
-          await navigator.mediaDevices.getUserMedia({ video: true });
-          setIsPermissionGranted(true);
-          startQrScanner();
-        } catch (err) {
-          console.error("Permissão de câmera negada", err);
-          setError("Permissão de câmera negada");
-          setIsPermissionGranted(false);
+    const interval = setInterval(() => {
+      if (webcamRef.current && webcamRef.current.getScreenshot()) {
+        const screenshot = webcamRef.current.getScreenshot();
+        if (screenshot) {
+          codeReader.decodeFromImage(undefined, screenshot)
+            .then(result => handleScan(result.getText()))
+            .catch(err => console.error(err));
         }
-      } else {
-        setIsMediaDevicesAvailable(false);
       }
-    };
-
-    const startQrScanner = () => {
-      if (typeof window !== 'undefined' && isPermissionGranted) {
-        html5QrCode.current = new Html5Qrcode(qrCodeRegionId);
-        const config = { fps: 10, qrbox: 250 };
-
-        const qrCodeSuccessCallback = (decodedText: string) => {
-          handleScan(decodedText);
-        };
-
-        const qrCodeErrorCallback = (errorMessage: string) => {
-          console.warn(`QR Code no longer in front of camera. ${errorMessage}`);
-        };
-
-        html5QrCode.current.start(
-          { facingMode: "environment" },
-          config,
-          qrCodeSuccessCallback,
-          qrCodeErrorCallback
-        ).catch((err) => {
-          console.error(`Unable to start scanning, error: ${err}`);
-          setError('Erro ao iniciar o scanner');
-        });
-
-        return () => {
-          if (html5QrCode.current) {
-            html5QrCode.current.stop().catch((err) => console.error(`Unable to stop scanning, error: ${err}`));
-          }
-        };
-      }
-    };
-
-    checkPermissions();
-  }, [isPermissionGranted]);
+    }, 500);
+    return () => clearInterval(interval);
+  }, []);
 
   const handleScan = async (decodedText: string) => {
     if (!processing) {
@@ -158,14 +114,12 @@ const ScanQR = () => {
       <ScanQRContainer>
         <h1>Escanear QR Code</h1>
         {processing && <Message>Processando...</Message>}
-        {!processing && isMediaDevicesAvailable && isPermissionGranted && (
-          <div id={qrCodeRegionId} style={{ width: '100%' }} />
-        )}
-        {!isMediaDevicesAvailable && (
-          <Message success={false}>Este navegador não suporta media devices.</Message>
-        )}
-        {!isPermissionGranted && (
-          <Message success={false}>Permissão de câmera negada. Por favor, permita o acesso à câmera.</Message>
+        {!processing && (
+          <Webcam
+            ref={webcamRef}
+            screenshotFormat="image/jpeg"
+            style={{ width: '100%' }}
+          />
         )}
         {data && (
           <ResultContainer>
@@ -186,3 +140,4 @@ const ScanQR = () => {
 };
 
 export default withAuth(ScanQR);
+
