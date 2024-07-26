@@ -1,12 +1,10 @@
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/router';
 import styled from 'styled-components';
-import dynamic from 'next/dynamic';
 import Layout from '../components/Layout';
 import withAuth from '../utils/withAuth';
 import axios from '../utils/axios';
-
-const QrScanner = dynamic(() => import('react-qr-scanner'), { ssr: false });
+import { Html5Qrcode } from 'html5-qrcode';
 
 const ScanQRContainer = styled.div`
   display: flex;
@@ -60,16 +58,74 @@ const ScanQR = () => {
   const [processing, setProcessing] = useState<boolean>(false);
   const [result, setResult] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [isMediaDevicesAvailable, setIsMediaDevicesAvailable] = useState<boolean>(true);
   const router = useRouter();
   const { compId, eventId, lobbyId } = router.query;
+  const qrCodeRegionId = "html5qr-code-full-region";
+  const html5QrCode = useRef<Html5Qrcode | null>(null);
 
-  const handleScan = async (result: any) => {
-    if (result && !processing) {
-      setData(result.text);
+  useEffect(() => {
+    if (typeof navigator !== 'undefined' && !navigator.mediaDevices) {
+      setIsMediaDevicesAvailable(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    const checkPermissions = async () => {
+      if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+        try {
+          await navigator.mediaDevices.getUserMedia({ video: true });
+          startQrScanner();
+        } catch (err) {
+          console.error("Permissão de câmera negada", err);
+          setError("Permissão de câmera negada");
+        }
+      } else {
+        setIsMediaDevicesAvailable(false);
+      }
+    };
+
+    const startQrScanner = () => {
+      if (typeof window !== 'undefined') {
+        html5QrCode.current = new Html5Qrcode(qrCodeRegionId);
+        const config = { fps: 10, qrbox: 250 };
+
+        const qrCodeSuccessCallback = (decodedText: string) => {
+          handleScan(decodedText);
+        };
+
+        const qrCodeErrorCallback = (errorMessage: string) => {
+          console.warn(`QR Code no longer in front of camera. ${errorMessage}`);
+        };
+
+        html5QrCode.current.start(
+          { facingMode: "environment" },
+          config,
+          qrCodeSuccessCallback,
+          qrCodeErrorCallback
+        ).catch((err) => {
+          console.error(`Unable to start scanning, error: ${err}`);
+          setError('Erro ao iniciar o scanner');
+        });
+
+        return () => {
+          if (html5QrCode.current) {
+            html5QrCode.current.stop().catch((err) => console.error(`Unable to stop scanning, error: ${err}`));
+          }
+        };
+      }
+    };
+
+    checkPermissions();
+  }, []);
+
+  const handleScan = async (decodedText: string) => {
+    if (!processing) {
+      setData(decodedText);
       setProcessing(true);
 
       const requestData = {
-        code: result.text,
+        code: decodedText,
         eventId,
         lobbyId,
         compId,
@@ -80,7 +136,7 @@ const ScanQR = () => {
         setResult(response.data.success || 'Ingresso validado com sucesso!');
         setError(null);
         setTimeout(() => {
-          router.push(`/car-list?compId=${compId}&eventId=${eventId}&lobbyId=${lobbyId}`);
+          router.push(`/validated-tickets?compId=${compId}&eventId=${eventId}&lobbyId=${lobbyId}`);
         }, 2000);
       } catch (error: any) {
         setError(error.response?.data?.error || 'Erro ao validar ingresso');
@@ -88,13 +144,6 @@ const ScanQR = () => {
         setProcessing(false);
       }
     }
-  };
-
-  const handleError = (error: any) => {
-    console.error(error);
-    setError('Erro ao escanear QR Code');
-    setResult(null);
-    setProcessing(false);
   };
 
   const handleBackToLobby = () => {
@@ -106,13 +155,11 @@ const ScanQR = () => {
       <ScanQRContainer>
         <h1>Escanear QR Code</h1>
         {processing && <Message>Processando...</Message>}
-        {!processing && (
-          <QrScanner
-            delay={300}
-            onError={handleError}
-            onScan={handleScan}
-            style={{ width: '100%' }}
-          />
+        {!processing && isMediaDevicesAvailable && (
+          <div id={qrCodeRegionId} style={{ width: '100%' }} />
+        )}
+        {!isMediaDevicesAvailable && (
+          <Message success={false}>Este navegador não suporta media devices.</Message>
         )}
         {data && (
           <ResultContainer>
