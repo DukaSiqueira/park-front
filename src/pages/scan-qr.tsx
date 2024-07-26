@@ -59,6 +59,7 @@ const ScanQR = () => {
   const [result, setResult] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [isMediaDevicesAvailable, setIsMediaDevicesAvailable] = useState<boolean>(true);
+  const [isPermissionGranted, setIsPermissionGranted] = useState<boolean>(true);
   const router = useRouter();
   const { compId, eventId, lobbyId } = router.query;
   const qrCodeRegionId = "html5qr-code-full-region";
@@ -75,10 +76,12 @@ const ScanQR = () => {
       if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
         try {
           await navigator.mediaDevices.getUserMedia({ video: true });
+          setIsPermissionGranted(true);
           startQrScanner();
         } catch (err) {
           console.error("Permissão de câmera negada", err);
           setError("Permissão de câmera negada");
+          setIsPermissionGranted(false);
         }
       } else {
         setIsMediaDevicesAvailable(false);
@@ -86,7 +89,7 @@ const ScanQR = () => {
     };
 
     const startQrScanner = () => {
-      if (typeof window !== 'undefined') {
+      if (typeof window !== 'undefined' && isPermissionGranted) {
         html5QrCode.current = new Html5Qrcode(qrCodeRegionId);
         const config = { fps: 10, qrbox: 250 };
 
@@ -117,7 +120,7 @@ const ScanQR = () => {
     };
 
     checkPermissions();
-  }, []);
+  }, [isPermissionGranted]);
 
   const handleScan = async (decodedText: string) => {
     if (!processing) {
@@ -155,11 +158,14 @@ const ScanQR = () => {
       <ScanQRContainer>
         <h1>Escanear QR Code</h1>
         {processing && <Message>Processando...</Message>}
-        {!processing && isMediaDevicesAvailable && (
+        {!processing && isMediaDevicesAvailable && isPermissionGranted && (
           <div id={qrCodeRegionId} style={{ width: '100%' }} />
         )}
         {!isMediaDevicesAvailable && (
           <Message success={false}>Este navegador não suporta media devices.</Message>
+        )}
+        {!isPermissionGranted && (
+          <Message success={false}>Permissão de câmera negada. Por favor, permita o acesso à câmera.</Message>
         )}
         {data && (
           <ResultContainer>
