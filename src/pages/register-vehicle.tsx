@@ -5,6 +5,7 @@ import Layout from '../components/Layout';
 import withAuth from '../utils/withAuth';
 import axios from '../utils/axios';
 import BackButton from '../components/BackButton';
+import LoadingModal from '../components/LoadingModal';
 
 const VehicleContainer = styled.div`
   display: flex;
@@ -148,7 +149,7 @@ const RegisterVehicle = () => {
   const [error, setError] = useState<string | null>(null);
   const [vehicles, setVehicles] = useState<any[]>([]);
   const router = useRouter();
-  const { ticket_code } = router.query;
+  const { ticket_code, compId } = router.query;
 
   useEffect(() => {
     const fetchVehicles = async () => {
@@ -180,6 +181,10 @@ const RegisterVehicle = () => {
 
       setResult('Veículo cadastrado com sucesso!');
       setError(null);
+      setType('car');
+      setColor('');
+      setModel('');
+      setPlate('');
 
       const fetchVehicles = async () => {
         try {
@@ -214,8 +219,13 @@ const RegisterVehicle = () => {
     }
   };
 
+  const handleBackToCompanies = () => {
+    router.push(`/companies`);
+  };
+
   return (
     <Layout>
+      {processing && <LoadingModal />}
       <VehicleContainer>
         <BackButton />
         <h1>{vehicles.length > 0 ? 'Detalhes do Veículo' : 'Cadastrar Veículo'}</h1>
@@ -273,6 +283,9 @@ const RegisterVehicle = () => {
             </VehicleCard>
           ))}
         </VehicleList>
+        <SubmitButton onClick={handleBackToCompanies}>
+          Voltar para Empresas
+        </SubmitButton>
       </VehicleContainer>
     </Layout>
   );

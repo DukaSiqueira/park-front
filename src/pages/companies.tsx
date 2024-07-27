@@ -5,6 +5,7 @@ import axios from '../utils/axios';
 import Layout from '../components/Layout';
 import withAuth from '../utils/withAuth';
 import BackButton from '../components/BackButton';
+import LoadingModal from '../components/LoadingModal';
 
 const CompanyListContainer = styled.div`
   display: flex;
@@ -65,6 +66,7 @@ const CompanyCard = styled.div`
 const CompanyList = () => {
   const [companies, setCompanies] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
+  const [loading, setLoading] = useState(false);
   const router = useRouter();
 
   useEffect(() => {
@@ -85,11 +87,13 @@ const CompanyList = () => {
   );
 
   const handleSelectCompany = (companyId: number) => {
+    setLoading(true);
     router.push(`/events?compId=${companyId}`);
   };
 
   return (
     <Layout>
+      {loading && <LoadingModal />}
       <CompanyListContainer>
         <BackButton />
         <h1>Empresas</h1>

@@ -5,6 +5,7 @@ import axios from '../utils/axios';
 import Layout from '../components/Layout';
 import withAuth from '../utils/withAuth';
 import BackButton from '../components/BackButton';
+import LoadingModal from '../components/LoadingModal';
 
 const LobbyListContainer = styled.div`
   display: flex;
@@ -70,6 +71,7 @@ const LobbyList = () => {
   const router = useRouter();
   const { compId, eventId } = router.query;
   const [lobbies, setLobbies] = useState([]);
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     if (eventId) {
@@ -88,11 +90,13 @@ const LobbyList = () => {
   }, [eventId]);
 
   const handleSelectLobby = (lobbyId: number) => {
+    setLoading(true);
     router.push(`/options?compId=${compId}&eventId=${eventId}&lobbyId=${lobbyId}`);
   };
 
   return (
     <Layout>
+      {loading && <LoadingModal />}
       <LobbyListContainer>
         <BackButton />
         <h1>Portarias</h1>

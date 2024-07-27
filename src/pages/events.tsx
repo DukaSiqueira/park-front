@@ -5,6 +5,7 @@ import axios from '../utils/axios';
 import Layout from '../components/Layout';
 import withAuth from '../utils/withAuth';
 import BackButton from '../components/BackButton';
+import LoadingModal from '../components/LoadingModal';
 
 const EventListContainer = styled.div`
   display: flex;
@@ -62,6 +63,7 @@ const Events = () => {
   const { compId } = router.query;
   const [events, setEvents] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     if (compId) {
@@ -83,11 +85,13 @@ const Events = () => {
   );
 
   const handleEventClick = (eventId: number) => {
+    setLoading(true);
     router.push(`/lobbies?compId=${compId}&eventId=${eventId}`);
   };
 
   return (
     <Layout>
+      {loading && <LoadingModal />}
       <EventListContainer>
         <BackButton />
         <h1>Eventos</h1>

@@ -5,6 +5,7 @@ import Layout from '../components/Layout';
 import withAuth from '../utils/withAuth';
 import axios from '../utils/axios';
 import BackButton from '../components/BackButton';
+import LoadingModal from '../components/LoadingModal';
 
 const ScanTicketContainer = styled.div`
   display: flex;
@@ -103,6 +104,7 @@ const ScanTicket = () => {
 
   return (
     <Layout>
+      {processing && <LoadingModal />}
       <ScanTicketContainer>
         <BackButton />
         <h1>Informar Código do Ingresso</h1>
