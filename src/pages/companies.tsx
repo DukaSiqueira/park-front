@@ -4,6 +4,7 @@ import { useRouter } from 'next/router';
 import axios from '../utils/axios';
 import Layout from '../components/Layout';
 import withAuth from '../utils/withAuth';
+import BackButton from '../components/BackButton';
 
 const CompanyListContainer = styled.div`
   display: flex;
@@ -90,6 +91,7 @@ const CompanyList = () => {
   return (
     <Layout>
       <CompanyListContainer>
+        <BackButton />
         <h1>Empresas</h1>
         <SearchInput
           type="text"

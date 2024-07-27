@@ -4,6 +4,7 @@ import styled from 'styled-components';
 import axios from '../utils/axios';
 import Layout from '../components/Layout';
 import withAuth from '../utils/withAuth';
+import BackButton from '../components/BackButton';
 
 const LobbyListContainer = styled.div`
   display: flex;
@@ -93,6 +94,7 @@ const LobbyList = () => {
   return (
     <Layout>
       <LobbyListContainer>
+        <BackButton />
         <h1>Portarias</h1>
         {lobbies.map((lobby: any) => (
           <LobbyCard key={lobby.id} onClick={() => handleSelectLobby(lobby.id)}>

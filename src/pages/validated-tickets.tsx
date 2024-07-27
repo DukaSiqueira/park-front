@@ -1,12 +1,12 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/router';
 import styled from 'styled-components';
-import axios from '../utils/axios';
 import Layout from '../components/Layout';
 import withAuth from '../utils/withAuth';
+import axios from '../utils/axios';
 import BackButton from '../components/BackButton';
 
-const EventListContainer = styled.div`
+const ValidatedTicketsContainer = styled.div`
   display: flex;
   flex-direction: column;
   justify-content: center;
@@ -32,7 +32,7 @@ const SearchInput = styled.input`
   }
 `;
 
-const EventCard = styled.div`
+const TicketCard = styled.div`
   background: white;
   border-radius: 10px;
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
@@ -55,56 +55,64 @@ const EventCard = styled.div`
     margin: 0.5rem 0;
     color: #333;
   }
+
+  p {
+    color: #777;
+    font-size: 0.9rem;
+  }
 `;
 
-const Events = () => {
+const ValidatedTickets = () => {
   const router = useRouter();
-  const { compId } = router.query;
-  const [events, setEvents] = useState([]);
+  const { eventId } = router.query;
+  const [tickets, setTickets] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
 
   useEffect(() => {
-    if (compId) {
-      const fetchEvents = async () => {
+    if (eventId) {
+      const fetchTickets = async () => {
         try {
-          const response = await axios.get(`/events/${compId}`);
-          setEvents(response.data);
+          const response = await axios.get(`/validated-tickets/${eventId}`);
+          setTickets(response.data);
         } catch (error) {
-          console.error('Error fetching events:', error);
+          console.error('Error fetching tickets:', error);
         }
       };
 
-      fetchEvents();
+      fetchTickets();
     }
-  }, [compId]);
+  }, [eventId]);
 
-  const filteredEvents = events.filter((event: any) =>
-    event.name.toLowerCase().includes(searchTerm.toLowerCase())
+  const filteredTickets = tickets.filter((ticket: any) =>
+    ticket.code.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
-  const handleEventClick = (eventId: number) => {
-    router.push(`/lobbies?compId=${compId}&eventId=${eventId}`);
+  const handleTicketClick = (ticketCode: string) => {
+    router.push(`/register-vehicle?ticket_code=${ticketCode}`);
   };
 
   return (
     <Layout>
-      <EventListContainer>
+      <ValidatedTicketsContainer>
         <BackButton />
-        <h1>Eventos</h1>
+        <h1>Ingressos Validados</h1>
         <SearchInput
           type="text"
-          placeholder="Buscar eventos..."
+          placeholder="Buscar pelo código do ingresso..."
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
         />
-        {filteredEvents.map((event: any) => (
-          <EventCard key={event.id} onClick={() => handleEventClick(event.id)}>
-            <h2>{event.name}</h2>
-          </EventCard>
+        {filteredTickets.map((ticket: any) => (
+          <TicketCard key={ticket.id} onClick={() => handleTicketClick(ticket.code)}>
+            <h2>{ticket.code}</h2>
+            <p>{ticket.ticketName}</p>
+            <p>{ticket.batchName}</p>
+            <p>{ticket.userName}</p>
+          </TicketCard>
         ))}
-      </EventListContainer>
+      </ValidatedTicketsContainer>
     </Layout>
   );
 };
 
-export default withAuth(Events);
+export default withAuth(ValidatedTickets);
