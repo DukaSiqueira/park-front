@@ -37,6 +37,10 @@ const InputField = styled.input`
   margin-bottom: 1rem;
 `;
 
+const RequiredInputField = styled(InputField)`
+  border-color: red;
+`;
+
 const SelectField = styled.select`
   padding: 0.5rem;
   font-size: 1rem;
@@ -168,6 +172,10 @@ const RegisterVehicle = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!plate) {
+      setError('A placa é obrigatória.');
+      return;
+    }
     setProcessing(true);
 
     try {
@@ -254,12 +262,13 @@ const RegisterVehicle = () => {
                 onChange={(e) => setModel(e.target.value)}
                 disabled={processing}
               />
-              <InputField
+              <RequiredInputField
                 type="text"
                 placeholder="Placa"
                 value={plate}
                 onChange={(e) => setPlate(e.target.value)}
                 disabled={processing}
+                required
               />
               <SubmitButton type="submit" disabled={processing}>
                 {processing ? 'Processando...' : 'Cadastrar Veículo'}
