@@ -1,7 +1,7 @@
 import { useRouter } from 'next/router';
 import styled from 'styled-components';
 import Layout from '../components/Layout';
-import { FaQrcode, FaTicketAlt } from 'react-icons/fa';
+import { FaQrcode, FaTicketAlt, FaKeyboard } from 'react-icons/fa';
 import withAuth from '../utils/withAuth';
 import BackButton from '../components/BackButton';
 
@@ -69,6 +69,10 @@ const Options = () => {
   const router = useRouter();
   const { compId, eventId, lobbyId } = router.query;
 
+  const handleScanQR = () => {
+    router.push(`/scan-qr?compId=${compId}&eventId=${eventId}&lobbyId=${lobbyId}`);
+  };
+
   const handleScanTicket = () => {
     router.push(`/scan-ticket?compId=${compId}&eventId=${eventId}&lobbyId=${lobbyId}`);
   };
@@ -82,11 +86,14 @@ const Options = () => {
       <OptionsContainer>
         <BackButton />
         <Title>Escolha uma Opção</Title>
+        <OptionButton onClick={handleScanQR}>
+          <FaQrcode size={24} /> Escanear QR Code
+        </OptionButton>
         <OptionButton onClick={handleScanTicket}>
-          <FaQrcode size={24} /> Informar Código do Ingresso
+          <FaKeyboard size={24} /> Informar Código do Ingresso
         </OptionButton>
         <OptionButton onClick={handleValidatedTickets}>
-          <FaTicketAlt size={24} /> Acessar Lista de Ingressos Validados
+          <FaTicketAlt size={24} /> Lista de Ingressos Validados
         </OptionButton>
       </OptionsContainer>
     </Layout>
