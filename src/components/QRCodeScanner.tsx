@@ -29,16 +29,15 @@ interface QRCodeScannerProps {
 const QRCodeScanner = ({ onScan }: QRCodeScannerProps) => {
   const [facingMode, setFacingMode] = useState<'environment' | 'user'>('environment');
   const [hasMultipleCameras, setHasMultipleCameras] = useState(false);
-  const [videoDevices, setVideoDevices] = useState<MediaDeviceInfo[]>([]);
+  const [teste, setTeste] = useState<any>('teste');
   const scannerRef = useRef<any>(null);
-  const videoRef = useRef<HTMLVideoElement>(null);
 
   useEffect(() => {
     const getDevices = async () => {
       try {
         const devices = await navigator.mediaDevices.enumerateDevices();
+        setTeste(devices);
         const videoDevices = devices.filter(device => device.kind === 'videoinput');
-        setVideoDevices(videoDevices);
         setHasMultipleCameras(videoDevices.length > 1);
       } catch (error) {
         console.error('Error enumerating devices:', error);
@@ -49,18 +48,16 @@ const QRCodeScanner = ({ onScan }: QRCodeScannerProps) => {
   }, []);
 
   useEffect(() => {
-    if (videoRef.current) {
+    if (scannerRef.current) {
       navigator.mediaDevices
         .getUserMedia({ video: { facingMode } })
         .then(stream => {
-          const video = videoRef.current;
-          if (video) {
-            if (video.srcObject) {
-              const tracks = (video.srcObject as MediaStream).getTracks();
-              tracks.forEach(track => track.stop());
-            }
-            video.srcObject = stream;
+          const video = scannerRef.current.video;
+          if (video.srcObject) {
+            const tracks = video.srcObject.getTracks();
+            tracks.forEach((track: any) => track.stop());
           }
+          video.srcObject = stream;
         })
         .catch(handleError);
     }
@@ -82,6 +79,7 @@ const QRCodeScanner = ({ onScan }: QRCodeScannerProps) => {
 
   return (
     <ScannerContainer>
+      <h1>{teste}</h1>
       {hasMultipleCameras && (
         <CameraSwitcher>
           <button onClick={handleCameraSwitch}>
@@ -96,8 +94,8 @@ const QRCodeScanner = ({ onScan }: QRCodeScannerProps) => {
           onError={handleError}
           onScan={handleScan}
           style={{ width: '100%' }}
+          facingMode={facingMode}
         />
-        <video ref={videoRef} style={{ display: 'none' }} />
       </Scanner>
     </ScannerContainer>
   );
