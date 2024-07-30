@@ -5,7 +5,6 @@ declare module 'react-qr-scanner' {
     onScan?: (data: any) => void;
     style?: React.CSSProperties;
     facingMode?: 'user' | 'environment';
-    ref?: Ref<QrScanner>;
   }
 
   export default class QrScanner extends React.Component<QrScannerProps> {}
