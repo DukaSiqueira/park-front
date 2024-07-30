@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 const api = axios.create({
-  baseURL: 'https://back.golist.com.br/api',
+  baseURL: 'http://3.149.229.178/api',
 });
 
 api.interceptors.request.use(config => {
