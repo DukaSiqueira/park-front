@@ -1,11 +1,14 @@
 declare module 'react-qr-scanner' {
-  interface QrScannerProps {
-    delay?: number;
-    onError?: (error: any) => void;
-    onScan?: (data: any) => void;
-    style?: React.CSSProperties;
-    facingMode?: 'user' | 'environment';
+    import { ComponentType, CSSProperties } from 'react';
+  
+    interface QrScannerProps {
+      delay: number;
+      onError: (error: any) => void;
+      onScan: (result: any) => void;
+      style?: CSSProperties;
+    }
+  
+    const QrScanner: ComponentType<QrScannerProps>;
+    export default QrScanner;
   }
-
-  export default class QrScanner extends React.Component<QrScannerProps> {}
-}
+  
