@@ -29,12 +29,14 @@ interface QRCodeScannerProps {
 const QRCodeScanner = ({ onScan }: QRCodeScannerProps) => {
   const [facingMode, setFacingMode] = useState<'environment' | 'user'>('environment');
   const [hasMultipleCameras, setHasMultipleCameras] = useState(false);
+  const [teste, setTeste] = useState<any>('teste');
   const scannerRef = useRef<any>(null);
 
   useEffect(() => {
     const getDevices = async () => {
       try {
         const devices = await navigator.mediaDevices.enumerateDevices();
+        setTeste(devices);
         const videoDevices = devices.filter(device => device.kind === 'videoinput');
         setHasMultipleCameras(videoDevices.length > 1);
       } catch (error) {
@@ -77,6 +79,7 @@ const QRCodeScanner = ({ onScan }: QRCodeScannerProps) => {
 
   return (
     <ScannerContainer>
+      <h1>{teste}</h1>
       {hasMultipleCameras && (
         <CameraSwitcher>
           <button onClick={handleCameraSwitch}>
