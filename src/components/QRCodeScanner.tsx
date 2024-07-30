@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import dynamic from 'next/dynamic';
 import styled from 'styled-components';
 
@@ -29,6 +29,8 @@ interface QRCodeScannerProps {
 const QRCodeScanner = ({ onScan }: QRCodeScannerProps) => {
   const [facingMode, setFacingMode] = useState<'environment' | 'user'>('environment');
   const [hasMultipleCameras, setHasMultipleCameras] = useState(false);
+  const [videoConstraints, setVideoConstraints] = useState<{ facingMode: 'environment' | 'user' }>({ facingMode: 'environment' });
+  const scannerRef = useRef<any>(null);
 
   useEffect(() => {
     const getDevices = async () => {
@@ -44,6 +46,18 @@ const QRCodeScanner = ({ onScan }: QRCodeScannerProps) => {
     getDevices();
   }, []);
 
+  useEffect(() => {
+    if (scannerRef.current) {
+      scannerRef.current.stop();
+      navigator.mediaDevices
+        .getUserMedia({ video: { facingMode } })
+        .then(stream => {
+          scannerRef.current.video.srcObject = stream;
+        })
+        .catch(handleError);
+    }
+  }, [facingMode]);
+
   const handleScan = (data: any) => {
     if (data) {
       onScan(data.text);
@@ -56,6 +70,7 @@ const QRCodeScanner = ({ onScan }: QRCodeScannerProps) => {
 
   const handleCameraSwitch = () => {
     setFacingMode(prevMode => (prevMode === 'environment' ? 'user' : 'environment'));
+    setVideoConstraints({ facingMode: facingMode === 'environment' ? 'user' : 'environment' });
   };
 
   return (
@@ -69,6 +84,7 @@ const QRCodeScanner = ({ onScan }: QRCodeScannerProps) => {
       )}
       <Scanner>
         <QrScanner
+          ref={scannerRef}
           delay={300}
           onError={handleError}
           onScan={handleScan}
