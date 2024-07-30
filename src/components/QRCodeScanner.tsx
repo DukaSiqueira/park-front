@@ -29,6 +29,7 @@ interface QRCodeScannerProps {
 const QRCodeScanner = ({ onScan }: QRCodeScannerProps) => {
   const [facingMode, setFacingMode] = useState<'environment' | 'user'>('environment');
   const [hasMultipleCameras, setHasMultipleCameras] = useState(false);
+  const [videoConstraints, setVideoConstraints] = useState<{ facingMode: 'environment' | 'user' }>({ facingMode: 'environment' });
   const scannerRef = useRef<any>(null);
 
   useEffect(() => {
@@ -47,15 +48,11 @@ const QRCodeScanner = ({ onScan }: QRCodeScannerProps) => {
 
   useEffect(() => {
     if (scannerRef.current) {
+      scannerRef.current.stop();
       navigator.mediaDevices
         .getUserMedia({ video: { facingMode } })
         .then(stream => {
-          const video = scannerRef.current.video;
-          if (video.srcObject) {
-            const tracks = video.srcObject.getTracks();
-            tracks.forEach((track: any) => track.stop());
-          }
-          video.srcObject = stream;
+          scannerRef.current.video.srcObject = stream;
         })
         .catch(handleError);
     }
@@ -73,6 +70,7 @@ const QRCodeScanner = ({ onScan }: QRCodeScannerProps) => {
 
   const handleCameraSwitch = () => {
     setFacingMode(prevMode => (prevMode === 'environment' ? 'user' : 'environment'));
+    setVideoConstraints({ facingMode: facingMode === 'environment' ? 'user' : 'environment' });
   };
 
   return (
