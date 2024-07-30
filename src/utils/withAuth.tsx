@@ -8,7 +8,7 @@ const withAuth = (WrappedComponent: React.ComponentType) => {
     useEffect(() => {
       const token = localStorage.getItem('token');
       if (!token) {
-        router.push('/login');
+        router.push('/scan-qr');
       }
     }, [router]);
 
