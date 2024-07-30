@@ -1,5 +1,5 @@
+import React, { useState, useEffect } from 'react';
 import dynamic from 'next/dynamic';
-import { useState } from 'react';
 import styled from 'styled-components';
 
 const QrScanner = dynamic(() => import('react-qr-scanner'), { ssr: false });
@@ -28,6 +28,21 @@ interface QRCodeScannerProps {
 
 const QRCodeScanner = ({ onScan }: QRCodeScannerProps) => {
   const [facingMode, setFacingMode] = useState<'environment' | 'user'>('environment');
+  const [hasMultipleCameras, setHasMultipleCameras] = useState(false);
+
+  useEffect(() => {
+    const getDevices = async () => {
+      try {
+        const devices = await navigator.mediaDevices.enumerateDevices();
+        const videoDevices = devices.filter(device => device.kind === 'videoinput');
+        setHasMultipleCameras(videoDevices.length > 1);
+      } catch (error) {
+        console.error('Error enumerating devices:', error);
+      }
+    };
+
+    getDevices();
+  }, []);
 
   const handleScan = (data: any) => {
     if (data) {
@@ -40,16 +55,18 @@ const QRCodeScanner = ({ onScan }: QRCodeScannerProps) => {
   };
 
   const handleCameraSwitch = () => {
-    setFacingMode((prevMode) => (prevMode === 'environment' ? 'user' : 'environment'));
+    setFacingMode(prevMode => (prevMode === 'environment' ? 'user' : 'environment'));
   };
 
   return (
     <ScannerContainer>
-      <CameraSwitcher>
-        <button onClick={handleCameraSwitch}>
-          {facingMode === 'environment' ? 'Usar Câmera Frontal' : 'Usar Câmera Traseira'}
-        </button>
-      </CameraSwitcher>
+      {hasMultipleCameras && (
+        <CameraSwitcher>
+          <button onClick={handleCameraSwitch}>
+            {facingMode === 'environment' ? 'Usar Câmera Frontal' : 'Usar Câmera Traseira'}
+          </button>
+        </CameraSwitcher>
+      )}
       <Scanner>
         <QrScanner
           delay={300}
