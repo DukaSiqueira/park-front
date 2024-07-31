@@ -56,6 +56,28 @@ const SwitchButton = styled.button`
   }
 `;
 
+const MessagePopup = styled.div`
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background-color: white;
+  border: 1px solid #ccc;
+  padding: 20px;
+  z-index: 1000;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+`;
+
+const Overlay = styled.div`
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  z-index: 999;
+`;
+
 interface QRCodeScannerProps {
   onScan: (data: string | null) => void;
 }
@@ -63,6 +85,7 @@ interface QRCodeScannerProps {
 const QRCodeScanner = ({ onScan }: QRCodeScannerProps) => {
   const [videoDevices, setVideoDevices] = useState<MediaDeviceInfo[]>([]);
   const [currentDeviceIndex, setCurrentDeviceIndex] = useState<number>(0);
+  const [message, setMessage] = useState<string | null>(null);
   const streamRef = useRef<MediaStream | null>(null);
 
   useEffect(() => {
@@ -119,6 +142,7 @@ const QRCodeScanner = ({ onScan }: QRCodeScannerProps) => {
 
   const handleScan = (data: any) => {
     if (data) {
+      setMessage(`Ingresso já validado: ${data.text}`);
       onScan(data.text);
     }
   };
@@ -133,8 +157,21 @@ const QRCodeScanner = ({ onScan }: QRCodeScannerProps) => {
     initializeCamera(videoDevices[nextDeviceIndex].deviceId);
   };
 
+  const closePopup = () => {
+    setMessage(null);
+  };
+
   return (
     <ScannerContainer>
+      {message && (
+        <>
+          <Overlay onClick={closePopup} />
+          <MessagePopup>
+            <p>{message}</p>
+            <button onClick={closePopup}>Fechar</button>
+          </MessagePopup>
+        </>
+      )}
       {videoDevices.length > 1 && (
         <SwitchButton onClick={handleSwitchCamera}>
           Alternar Câmera
