@@ -11,6 +11,7 @@ const ScannerContainer = styled.div`
   align-items: center;
   height: 100vh;
   padding: 20px;
+  position: relative;
 
   @media (max-height: 768px) {
     max-height: 300px;
@@ -78,6 +79,40 @@ const Overlay = styled.div`
   z-index: 999;
 `;
 
+const Loader = styled.div`
+  border: 4px solid #f3f3f3;
+  border-top: 4px solid #0070f3;
+  border-radius: 50%;
+  width: 40px;
+  height: 40px;
+  animation: spin 2s linear infinite;
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 1001;
+
+  @keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+  }
+`;
+
+const AccessTicketButton = styled.button`
+  padding: 10px 20px;
+  font-size: 16px;
+  cursor: pointer;
+  margin-top: 20px;
+  background-color: #28a745;
+  color: white;
+  border: none;
+  border-radius: 5px;
+
+  &:hover {
+    background-color: #218838;
+  }
+`;
+
 interface QRCodeScannerProps {
   onScan: (data: string | null) => void;
 }
@@ -86,6 +121,8 @@ const QRCodeScanner = ({ onScan }: QRCodeScannerProps) => {
   const [videoDevices, setVideoDevices] = useState<MediaDeviceInfo[]>([]);
   const [currentDeviceIndex, setCurrentDeviceIndex] = useState<number>(0);
   const [message, setMessage] = useState<string | null>(null);
+  const [loading, setLoading] = useState<boolean>(true);
+  const [ticketCode, setTicketCode] = useState<string | null>(null);
   const streamRef = useRef<MediaStream | null>(null);
 
   useEffect(() => {
@@ -105,8 +142,10 @@ const QRCodeScanner = ({ onScan }: QRCodeScannerProps) => {
           setCurrentDeviceIndex(initialIndex);
           await initializeCamera(videoInputDevices[initialIndex].deviceId);
         }
+        setLoading(false);
       } catch (error) {
         console.error('Error accessing media devices.', error);
+        setLoading(false);
       }
     }
 
@@ -143,7 +182,11 @@ const QRCodeScanner = ({ onScan }: QRCodeScannerProps) => {
   const handleScan = (data: any) => {
     if (data) {
       setMessage(`Ingresso já validado: ${data.text}`);
+      setTicketCode(data.text);
       onScan(data.text);
+      if (streamRef.current) {
+        streamRef.current.getTracks().forEach(track => track.stop());
+      }
     }
   };
 
@@ -159,33 +202,51 @@ const QRCodeScanner = ({ onScan }: QRCodeScannerProps) => {
 
   const closePopup = () => {
     setMessage(null);
+    setTicketCode(null);
+    initializeCamera(videoDevices[currentDeviceIndex].deviceId);
+  };
+
+  const handleAccessTicket = () => {
+    if (ticketCode) {
+      window.location.href = `/register-vehicle?ticket_code=${ticketCode}`;
+    }
   };
 
   return (
     <ScannerContainer>
-      {message && (
+      {loading && <Loader />}
+      {!loading && (
         <>
-          <Overlay onClick={closePopup} />
-          <MessagePopup>
-            <p>{message}</p>
-            <button onClick={closePopup}>Fechar</button>
-          </MessagePopup>
+          {message && (
+            <>
+              <Overlay onClick={closePopup} />
+              <MessagePopup>
+                <p>{message}</p>
+                <button onClick={closePopup}>Fechar</button>
+                <AccessTicketButton onClick={handleAccessTicket}>Acessar Ingresso</AccessTicketButton>
+              </MessagePopup>
+            </>
+          )}
+          {!message && (
+            <>
+              {videoDevices.length > 1 && (
+                <SwitchButton onClick={handleSwitchCamera}>
+                  Alternar Câmera
+                </SwitchButton>
+              )}
+              <Scanner>
+                <QrScanner
+                  delay={300}
+                  onError={handleError}
+                  onScan={handleScan}
+                  style={{ width: '100%' }}
+                  constraints={{ video: { deviceId: videoDevices[currentDeviceIndex]?.deviceId || undefined } }}
+                />
+              </Scanner>
+            </>
+          )}
         </>
       )}
-      {videoDevices.length > 1 && (
-        <SwitchButton onClick={handleSwitchCamera}>
-          Alternar Câmera
-        </SwitchButton>
-      )}
-      <Scanner>
-        <QrScanner
-          delay={300}
-          onError={handleError}
-          onScan={handleScan}
-          style={{ width: '100%' }}
-          constraints={{ video: { deviceId: videoDevices[currentDeviceIndex]?.deviceId || undefined } }}
-        />
-      </Scanner>
     </ScannerContainer>
   );
 };
