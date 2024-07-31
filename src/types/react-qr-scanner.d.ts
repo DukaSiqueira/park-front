@@ -6,6 +6,7 @@ declare module 'react-qr-scanner' {
       onError: (error: any) => void;
       onScan: (result: any) => void;
       style?: CSSProperties;
+      constraints?: MediaStreamConstraints;
     }
   
     const QrScanner: ComponentType<QrScannerProps>;
