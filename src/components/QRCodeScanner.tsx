@@ -24,6 +24,7 @@ interface QRCodeScannerProps {
 
 const QRCodeScanner = ({ onScan }: QRCodeScannerProps) => {
   const [result, setResult] = useState<any | null>(null);
+  
   const handleScan = (data: any) => {
     if (data) {
       onScan(data.text);
@@ -35,25 +36,31 @@ const QRCodeScanner = ({ onScan }: QRCodeScannerProps) => {
   };
 
   async function getDevices() {
+    // Solicita permissão de acesso à câmera
+    await navigator.mediaDevices.getUserMedia({ video: true });
+
+    // Após a permissão ser concedida, lista os dispositivos disponíveis
     const devices = await navigator.mediaDevices.enumerateDevices();
     console.log('devices', devices);
     
     setResult(devices);
   }
 
-
   return (
     <ScannerContainer>
       <button onClick={getDevices}>Get Devices</button>
       <p>{JSON.stringify(result)}</p>
-      {/* <Scanner>
+      {/* 
+      Descomente a seção abaixo para ativar o escaneamento de QR Code após realizar os testes
+      <Scanner>
         <QrScanner
           delay={300}
           onError={handleError}
           onScan={handleScan}
           style={{ width: '100%' }}
         />
-      </Scanner> */}
+      </Scanner> 
+      */}
     </ScannerContainer>
   );
 };
