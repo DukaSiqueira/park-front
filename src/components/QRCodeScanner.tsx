@@ -37,7 +37,6 @@ interface QRCodeScannerProps {
 }
 
 const QRCodeScanner = ({ onScan }: QRCodeScannerProps) => {
-  const [result, setResult] = useState<any | null>(null);
   const [videoDevices, setVideoDevices] = useState<MediaDeviceInfo[]>([]);
   const [currentDeviceIndex, setCurrentDeviceIndex] = useState(0);
   const [stream, setStream] = useState<MediaStream | null>(null);
@@ -45,16 +44,12 @@ const QRCodeScanner = ({ onScan }: QRCodeScannerProps) => {
   useEffect(() => {
     async function getDevices() {
       try {
-        // Solicita permissão de acesso à câmera
         await navigator.mediaDevices.getUserMedia({ video: true });
 
-        // Após a permissão ser concedida, lista os dispositivos disponíveis
         const devices = await navigator.mediaDevices.enumerateDevices();
-        setResult(devices);
         const videoInputDevices = devices.filter(device => device.kind === 'videoinput');
         setVideoDevices(videoInputDevices);
 
-        // Inicializa a câmera com o primeiro dispositivo disponível
         if (videoInputDevices.length > 0) {
           await initializeCamera(videoInputDevices[0].deviceId);
         }
@@ -116,7 +111,6 @@ const QRCodeScanner = ({ onScan }: QRCodeScannerProps) => {
           Alternar Câmera
         </SwitchButton>
       )}
-      <p>{JSON.stringify(result)}</p>
       <Scanner>
         <QrScanner
           delay={300}
