@@ -38,25 +38,13 @@ const QRCodeScanner = ({ onScan }: QRCodeScannerProps) => {
   const [cameraFacing, setCameraFacing] = useState('environment');
   const [stream, setStream] = useState<MediaStream | null>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
-  const [videoDevices, setVideoDevices] = useState<MediaDeviceInfo[]>([]);
-  const [currentDeviceIndex, setCurrentDeviceIndex] = useState(0);
 
   useEffect(() => {
-    const getVideoDevices = async () => {
-      const devices = await navigator.mediaDevices.enumerateDevices();
-      const videoDevices = devices.filter(device => device.kind === 'videoinput');
-      setVideoDevices(videoDevices);
-    };
-
-    getVideoDevices();
-  }, []);
-
-  useEffect(() => {
-    const handleVideo = async (deviceId: string) => {
+    const handleVideo = async (cameraFacing: string) => {
       const constraints = {
         video: {
-          deviceId: {
-            exact: deviceId
+          facingMode: {
+            exact: cameraFacing
           }
         }
       };
@@ -73,16 +61,14 @@ const QRCodeScanner = ({ onScan }: QRCodeScannerProps) => {
       }
     };
 
-    if (videoDevices.length > 0) {
-      handleVideo(videoDevices[currentDeviceIndex].deviceId);
-    }
+    handleVideo(cameraFacing);
 
     return () => {
       if (stream) {
         stream.getTracks().forEach(track => track.stop());
       }
     };
-  }, [videoDevices, currentDeviceIndex]);
+  }, [cameraFacing]);
 
   const handleScan = (data: any) => {
     if (data) {
@@ -95,7 +81,7 @@ const QRCodeScanner = ({ onScan }: QRCodeScannerProps) => {
   };
 
   const handleSwitchCamera = () => {
-    setCurrentDeviceIndex(prevIndex => (prevIndex + 1) % videoDevices.length);
+    setCameraFacing(prev => (prev === 'environment' ? 'user' : 'environment'));
   };
 
   return (
