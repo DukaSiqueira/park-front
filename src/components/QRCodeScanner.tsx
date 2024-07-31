@@ -10,9 +10,14 @@ const ScannerContainer = styled.div`
   justify-content: center;
   align-items: center;
   height: 100vh;
+  padding: 20px;
 
   @media (max-height: 768px) {
     max-height: 300px;
+  }
+
+  @media (max-width: 480px) {
+    padding: 10px;
   }
 `;
 
@@ -23,6 +28,10 @@ const Scanner = styled.div`
 
   @media (max-width: 768px) {
     max-width: 250px;
+  }
+
+  @media (max-width: 480px) {
+    max-width: 200px;
   }
 `;
 
@@ -35,6 +44,13 @@ const SwitchButton = styled.button`
   color: white;
   border: none;
   border-radius: 5px;
+
+  @media (max-width: 480px) {
+    padding: 8px 16px;
+    font-size: 14px;
+    margin-top: 10px;
+  }
+
   &:hover {
     background-color: #0056b3;
   }
