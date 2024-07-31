@@ -10,6 +10,10 @@ const ScannerContainer = styled.div`
   justify-content: center;
   align-items: center;
   height: 100vh;
+
+  @media (max-height: 768px) {
+    max-height: 300px;
+  }
 `;
 
 const Scanner = styled.div`
