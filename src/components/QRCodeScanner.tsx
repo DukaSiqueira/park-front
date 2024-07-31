@@ -67,6 +67,9 @@ const MessagePopup = styled.div`
   padding: 20px;
   z-index: 1000;
   box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  align-items: center;
+  justify-content: center;
+  border-radius: 4px;
 `;
 
 const Overlay = styled.div`

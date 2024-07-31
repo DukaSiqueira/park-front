@@ -64,7 +64,6 @@ const ScanQR = () => {
         {result && <p>{result}</p>}
         {error && (
           <>
-            <p>{error}</p>
             <button onClick={handleBackToLobby}>Voltar para Portaria</button>
           </>
         )}
