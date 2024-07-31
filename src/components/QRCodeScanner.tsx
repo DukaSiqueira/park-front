@@ -1,5 +1,5 @@
 import dynamic from 'next/dynamic';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import styled from 'styled-components';
 
 const QrScanner = dynamic(() => import('react-qr-scanner'), { ssr: false });
@@ -16,6 +16,10 @@ const Scanner = styled.div`
   width: 100%;
   max-width: 400px;
   margin: auto;
+
+  @media (max-width: 768px) {
+    max-width: 250px;
+  }
 `;
 
 const SwitchButton = styled.button`
@@ -38,8 +42,8 @@ interface QRCodeScannerProps {
 
 const QRCodeScanner = ({ onScan }: QRCodeScannerProps) => {
   const [videoDevices, setVideoDevices] = useState<MediaDeviceInfo[]>([]);
-  const [currentDeviceIndex, setCurrentDeviceIndex] = useState(0);
-  const [stream, setStream] = useState<MediaStream | null>(null);
+  const [currentDeviceIndex, setCurrentDeviceIndex] = useState<number>(0);
+  const streamRef = useRef<MediaStream | null>(null);
 
   useEffect(() => {
     async function getDevices() {
@@ -51,7 +55,12 @@ const QRCodeScanner = ({ onScan }: QRCodeScannerProps) => {
         setVideoDevices(videoInputDevices);
 
         if (videoInputDevices.length > 0) {
-          await initializeCamera(videoInputDevices[0].deviceId);
+          const backCameraIndex = videoInputDevices.findIndex(device =>
+            device.label.toLowerCase().includes('back') || device.label.toLowerCase().includes('traseira')
+          );
+          const initialIndex = backCameraIndex !== -1 ? backCameraIndex : 0;
+          setCurrentDeviceIndex(initialIndex);
+          await initializeCamera(videoInputDevices[initialIndex].deviceId);
         }
       } catch (error) {
         console.error('Error accessing media devices.', error);
@@ -61,15 +70,15 @@ const QRCodeScanner = ({ onScan }: QRCodeScannerProps) => {
     getDevices();
 
     return () => {
-      if (stream) {
-        stream.getTracks().forEach(track => track.stop());
+      if (streamRef.current) {
+        streamRef.current.getTracks().forEach(track => track.stop());
       }
     };
   }, []);
 
   const initializeCamera = async (deviceId: string) => {
-    if (stream) {
-      stream.getTracks().forEach(track => track.stop());
+    if (streamRef.current) {
+      streamRef.current.getTracks().forEach(track => track.stop());
     }
 
     const constraints = {
@@ -82,7 +91,7 @@ const QRCodeScanner = ({ onScan }: QRCodeScannerProps) => {
 
     try {
       const newStream = await navigator.mediaDevices.getUserMedia(constraints);
-      setStream(newStream);
+      streamRef.current = newStream;
     } catch (error) {
       console.error('Error initializing camera.', error);
     }
