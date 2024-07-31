@@ -1,4 +1,5 @@
 import dynamic from 'next/dynamic';
+import { useState } from 'react';
 import styled from 'styled-components';
 
 const QrScanner = dynamic(() => import('react-qr-scanner'), { ssr: false });
@@ -22,6 +23,7 @@ interface QRCodeScannerProps {
 }
 
 const QRCodeScanner = ({ onScan }: QRCodeScannerProps) => {
+  const [result, setResult] = useState<any | null>(null);
   const handleScan = (data: any) => {
     if (data) {
       onScan(data.text);
@@ -32,16 +34,26 @@ const QRCodeScanner = ({ onScan }: QRCodeScannerProps) => {
     console.error(error);
   };
 
+  async function getDevices() {
+    const devices = await navigator.mediaDevices.enumerateDevices();
+    console.log('devices', devices);
+    
+    setResult(devices);
+  }
+
+
   return (
     <ScannerContainer>
-      <Scanner>
+      <button onClick={getDevices}>Get Devices</button>
+      <p>{JSON.stringify(result)}</p>
+      {/* <Scanner>
         <QrScanner
           delay={300}
           onError={handleError}
           onScan={handleScan}
           style={{ width: '100%' }}
         />
-      </Scanner>
+      </Scanner> */}
     </ScannerContainer>
   );
 };
